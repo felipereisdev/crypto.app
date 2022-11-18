@@ -5,10 +5,16 @@
       <h1>Update in: {{ count }}</h1>
     </div>
     <div class="w-full items-center justify-start flex gap-4 flex-wrap mt-5">
-      <div class="card w-1/6 bg-base-200 shadow cursor-pointer" v-for="(myPair, index) in myPairs" :key="index" @click="() => handleClick(myPair.symbol)">
-        <div class="flex justify-between items-center card-body">
-          <h2>{{ myPair.asset }}</h2>
-          <span :id="myPair.symbol">0,00</span>
+      <div class="card w-1/6 bg-base-200 shadow" v-for="(myPair, index) in myPairs" :key="index">
+        <div class="flex justify-between items-start card-body">
+          <div class="flex gap-3">
+            <h2>{{ myPair.asset }}</h2>
+            <span :id="`${myPair.symbol}-percent`" class="text-sm">0%</span>
+          </div>
+          <div class="flex gap-3">
+            <span :id="myPair.symbol" class="font-bold">0,00</span>
+            <button class="btn btn-sm" title="chart" @click="() => handleClick(myPair.symbol)"><i class="las la-chart-bar"></i></button>
+          </div>
         </div>
       </div>
     </div>
@@ -47,16 +53,26 @@ export default {
       if (response) {
         await response.forEach(pair => {
           const myPair = this.myPairs.find(p => p.symbol === pair.symbol);
-          let price = pair.price;
+          let price = pair.lastPrice;
 
           if (myPair && myPair.locale) {
-            price = new Intl.NumberFormat(myPair.locale, { style: 'currency', currency: myPair.cash }).format(pair.price);
+            price = new Intl.NumberFormat(myPair.locale, { style: 'currency', currency: myPair.cash }).format(pair.lastPrice);
           }
 
           const spanPrice = document.getElementById(pair.symbol);
 
           if (spanPrice) {
             spanPrice.textContent = price;
+          }
+
+          const spanPercent = document.getElementById(`${pair.symbol}-percent`);
+
+          if (spanPercent) {
+
+            spanPercent.textContent = new Intl.NumberFormat(myPair.locale, { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(pair.priceChangePercent / 100);
+
+            spanPercent.classList.remove(...spanPercent.classList);
+            spanPercent.classList.add(pair.priceChangePercent < 0 ? 'text-red-500' : 'text-green-500');
           }
         });
       }

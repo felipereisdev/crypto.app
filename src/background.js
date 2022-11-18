@@ -139,7 +139,7 @@ ipcMain.handle('get-prices', async () => {
   try {
       const myPairs = store.get('my_cryptos_pairs');
       const parseMyPairs = myPairs.map(pair => `"${pair.symbol}"`);
-      const response = await api.get(`/ticker/price?symbols=[${parseMyPairs.join(',')}]`);
+      const response = await api.get(`/ticker/24hr?symbols=[${parseMyPairs.join(',')}]`);
 
       return response.data;
   } catch (e) {
